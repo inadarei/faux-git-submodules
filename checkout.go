@@ -41,12 +41,7 @@ const (
 func main() {
 	modules := getModules(cfgOpts{})
 
-	commands := toGitCommands(modules)
-
-	for _, cmd := range commands {
-		fmt.Println(cmd)
-		fmt.Print(execute(cmd))
-	}
+	execGitCommands(modules)
 
 	for _, module := range modules {
 		addIfMissing(".gitignore", module.path)
@@ -74,10 +69,18 @@ func addIfMissing(filePath string, needle string) {
 * Properly execute a shell command without swallowing outputs or any of the
 * silly things Go does by default
  */
-func execute(command string) string {
+func execute(command string, inDir string) string {
 	//cmd = cmd + " 1>&2"
 
 	var output string
+	var lastDir string
+	var err error
+
+	if inDir != "" {
+		lastDir, err = os.Getwd()
+		check(err)
+		os.Chdir(inDir)
+	}
 
 	args := strings.Split(command, " ")
 	app := args[0]
@@ -104,6 +107,11 @@ func execute(command string) string {
 	}
 
 	errW := cmd.Wait()
+
+	if inDir != "" {
+		os.Chdir(lastDir)
+	}
+
 	if errW != nil {
 		_ = err // can add to ouput but not useful for git commands
 	}
@@ -129,7 +137,7 @@ func getModules(opts cfgOpts) []gitModule {
 	modules := []gitModule{}
 
 	if opts.filepath == "" {
-		opts.filepath = "./fgs.json"
+		opts.filepath = "./config/repos.json"
 	}
 
 	bRepos, err := ioutil.ReadFile(opts.filepath)
@@ -172,23 +180,24 @@ func getModules(opts cfgOpts) []gitModule {
 * Turn config into appropriate git commands. If a destination already
 * exists then we do git pull, if not: git clone
  */
-func toGitCommands(modules []gitModule) []string {
-	commands := []string{}
+func execGitCommands(modules []gitModule) {
 
 	var cmd string
 	for _, module := range modules {
 		pathIs := checkPath(module.path)
 		if pathIs == pathFolder {
-			cmd = fmt.Sprintf("cd %s && git pull && cd -", module.path)
+			cmd = fmt.Sprintf("git pull")
+			fmt.Println(cmd)
+			fmt.Print(execute(cmd, module.path))
 		} else if pathIs == pathMissing {
 			cmd = fmt.Sprintf("git clone -b %s %s %s", module.branch, module.url, module.path)
+			fmt.Println(cmd)
+			fmt.Print(execute(cmd, ""))
 		} else { // pathIs == pathNonFolder
 			abort("Path already exists and is not a folder: " + module.path)
 		}
-		commands = append(commands, cmd)
 	}
 
-	return commands
 }
 
 /**
