@@ -136,8 +136,8 @@ func debugCurrPath() {
 func getModules(opts cfgOpts) []gitModule {
 	modules := []gitModule{}
 
-	if opts.filepath == "" {
-		opts.filepath = "./config/repos.json"
+        if opts.filepath == "" {
+		opts.filepath = "./fgs.json"
 	}
 
 	bRepos, err := ioutil.ReadFile(opts.filepath)
