@@ -7,6 +7,8 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"path"
+	"errors"
 )
 
 func check(e error) {
@@ -39,6 +41,7 @@ const (
 )
 
 func main() {
+
 	modules := getModules(cfgOpts{})
 
 	execGitCommands(modules)
@@ -47,6 +50,30 @@ func main() {
 		addIfMissing(".gitignore", module.path)
 	}
 
+}
+
+func displayHelp(missingConfig bool) {
+
+	colorReset := "\033[0m"
+    colorRed := "\033[31m"
+    //colorGreen := "\033[32m"
+    colorYellow := "\033[33m"
+    //colorBlue := "\033[34m"
+    //colorPurple := "\033[35m"
+    //colorCyan := "\033[36m"
+    //colorWhite := "\033[37m"
+
+	if (missingConfig) {
+		fmt.Println(string(colorRed), "Missing: ", string(colorReset), "fgs.json configuration file!")
+		fmt.Println("For an example fgs.json, see: https://github.com/inadarei/faux-git-submodules")
+		fmt.Println(" 	")
+	}
+    
+	progName := path.Base(os.Args[0])
+	fmt.Println("Command utility to easily check-out faux git submodules.");
+	fmt.Println("For more information: ","https://github.com/inadarei/faux-git-submodules/");
+	fmt.Println(" 	")
+	fmt.Println("	", string(colorYellow), "Usage: ", string(colorReset), progName);
 }
 
 /**
@@ -136,10 +163,14 @@ func debugCurrPath() {
 func getModules(opts cfgOpts) []gitModule {
 	modules := []gitModule{}
 
-        if opts.filepath == "" {
+	if opts.filepath == "" {
 		opts.filepath = "./fgs.json"
 	}
 
+	if _, err := os.Stat(opts.filepath); errors.Is(err, os.ErrNotExist) {
+		displayHelp(true)
+		os.Exit(1);
+	}
 	bRepos, err := ioutil.ReadFile(opts.filepath)
 	check(err)
 
