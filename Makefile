@@ -1,7 +1,7 @@
 default: build-all
 
 .PHONY: build-all
-build-all: linux-intel linux-arm mac-intel mac-arm windows-intel
+build-all: linux-intel linux-arm mac-intel mac-arm windows-intel zip
 
 .PHONY: mac-intel
 mac-intel:
@@ -26,3 +26,7 @@ linux-arm:
 .PHONY: windows-intel
 windows-intel:
 	env GOOS=windows GOARCH=amd64 go build -o build/checkout.exe
+
+.PHONY: zip
+zip:
+	tar -czvf build/all-checkout-binaries.tar.gz build/checkout*
