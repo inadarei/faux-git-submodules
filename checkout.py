@@ -24,10 +24,8 @@ def getModules():
 def checkPath(path):
 	if not os.path.exists(path):
 		return "missing"
-
 	if os.path.isdir(path):
 		return "folder"
-
 	return "notFoler"
 
 def execGitCommands(modules):
@@ -53,21 +51,17 @@ def execGitCommands(modules):
 		if whatIsIt == "notFolder":
 			print ("Cannot create '{module}' folder because path already exists")
 
-	return "success"
-
 def addIfMissing(ignorefile, entry):
 	if not os.path.exists(ignorefile):
 		os.system(f"touch {ignorefile}")
 
-	file = open(ignorefile,mode='r')
-	contents = file.read()
-	file.close()		
+	with open(ignorefile,mode='r') as file:
+		contents = file.read()
 
 	if not entry in contents:
-		fo = open(ignorefile, 'a')
-		fo.write(f"{entry}\n")
-		fo.close()
-		print (f"Added {entry} to {ignorefile}");
+		with open(ignorefile, 'a') as fo:
+			fo.write(f"{entry}\n")	
+			print (f"Added {entry} to {ignorefile}");
 	#else:
 	#	print (f"ignorefile has {entry}")
 
