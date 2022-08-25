@@ -191,7 +191,7 @@ func getModules(opts cfgOpts) []gitModule {
 
 		branch := cfg.(map[string]interface{})["branch"]
 		if branch == nil {
-			sBranch = "master"
+			sBranch = "main"
 		} else {
 			sBranch = branch.(string)
 		}
