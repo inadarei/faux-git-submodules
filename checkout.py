@@ -26,7 +26,7 @@ def checkPath(path):
 		return "missing"
 	if os.path.isdir(path):
 		return "folder"
-	return "notFoler"
+	return "notFolder"
 
 def execGitCommands(modules):
 	"""
